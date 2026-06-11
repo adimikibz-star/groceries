@@ -2,13 +2,18 @@
   "name": "groceries",
   "version": "1.0.0",
   "description": "Making an efficient tool to plan for groceries shopping",
-  "main": "src/index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "node dist/server.js",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "docker:build": "docker build -t groceries:latest .",
+    "docker:run": "docker run -p 3000:3000 groceries:latest",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down"
   },
   "keywords": [
     "grocery",
@@ -19,12 +24,17 @@
   "author": "adimikibz-star",
   "license": "MIT",
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
     "jest": "^29.5.0",
+    "nodemon": "^3.0.1",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.0",
-    "nodemon": "^3.0.1"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
 }

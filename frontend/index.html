@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Shopping List Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input, select, button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input, select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.danger {
+            background: #ff6b6b;
+        }
+
+        button.danger:hover {
+            background: #ee5a52;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .item.purchased {
+            opacity: 0.6;
+            text-decoration: line-through;
+            border-left-color: #51cf66;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .item-details {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 80px;
+            text-align: right;
+            margin-right: 15px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .item-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffe0e0;
+            color: #d32f2f;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Grocery Shopping List Manager</h1>
+        <p class="subtitle">Plan your shopping efficiently with budget tracking</p>
+
+        <div id="message"></div>
+
+        <div class="section">
+            <h2>Add New Item</h2>
+            <div class="form-group">
+                <input type="text" id="itemName" placeholder="Item name (e.g., Apples)" />
+                <input type="number" id="itemQuantity" placeholder="Quantity" min="1" />
+                <select id="itemCategory">
+                    <option value="">Select Category</option>
+                    <option value="Fruits">🍎 Fruits</option>
+                    <option value="Vegetables">🥬 Vegetables</option>
+                    <option value="Dairy">🥛 Dairy</option>
+                    <option value="Bakery">🍞 Bakery</option>
+                    <option value="Meat">🥩 Meat</option>
+                    <option value="Pantry">🥫 Pantry</option>
+                </select>
+                <input type="number" id="itemPrice" placeholder="Price" min="0" step="0.01" />
+                <button onclick="addItem()">Add Item</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Summary</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Items</div>
+                    <div class="stat-value" id="totalItems">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Budget</div>
+                    <div class="stat-value">$<span id="budget">100</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Spent</div>
+                    <div class="stat-value">$<span id="spent">0.00</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Remaining</div>
+                    <div class="stat-value">$<span id="remaining">100.00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Your Shopping List</h2>
+            <div id="itemsList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentListId = 'default';
+
+        async function loadList() {
+            try {
+                const response = await fetch(`${API_URL}/lists/${currentListId}`);
+                if (!response.ok) throw new Error('Failed to load list');
+                const data = await response.json();
+                renderList(data.list);
+            } catch (error) {
+                console.error(error);
+                showMessage('Failed to load list', 'error');
+            }
+        }
+
+        function renderList(list) {
+            const itemsList = document.getElementById('itemsList');
+            const totalItems = document.getElementById('totalItems');
+            const budget = document.getElementById('budget');
+            const spent = document.getElementById('spent');
+            const remaining = document.getElementById('remaining');
+
+            if (list.items.length === 0) {
+                itemsList.innerHTML = '<div class="empty-state">No items yet. Add your first item above!</div>';
+            } else {
+                itemsList.innerHTML = list.items.map(item => `
+                    <div class="item ${item.purchased ? 'purchased' : ''}">
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-details">Qty: ${item.quantity} | Category: ${item.category}</div>
+                        </div>
+                        <div class="item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="item-actions">
+                            ${!item.purchased ? `<button onclick="purchaseItem('${item.id}')">✓ Buy</button>` : ''}
+                            <button class="danger" onclick="removeItem('${item.id}')">🗑 Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            totalItems.textContent = list.items.length;
+            budget.textContent = list.budget;
+            spent.textContent = list.totalSpent.toFixed(2);
+            remaining.textContent = list.budget - list.totalSpent.toFixed(2);
+        }
+
+        async function addItem() {
+            const name = document.getElementById('itemName').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value);
+            const category = document.getElementById('itemCategory').value;
+            const price = parseFloat(document.getElementById('itemPrice').value);
+
+            if (!name || !quantity || !category || !price) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/lists/${currentListId}/items`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, quantity, category, price })
+                });
+
+                if (!response.ok) throw new Error('Failed to add item');
+                const data = await response.json();
+                renderList(data.list);
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemQuantity').value = '';
+                document.getElementById('itemCategory').value = '';
+                document.getElementById('itemPrice').value = '';
+                showMessage(`Added ${name} to your list!`, 'success');
+            } catch (error) {
+                console.error(error);
+                showMessage('Failed to add item', 'error');
+            }
+        }
+
+        async function purchaseItem(itemId) {
+            try {
+                const response = await fetch(`${API_URL}/lists/${currentListId}/items/${itemId}/purchase`, {
+                    method: 'PATCH'
+                });
+                if (!response.ok) throw new Error('Failed to mark as purchased');
+                const data = await response.json();
+                renderList(data.list);
+            } catch (error) {
+                console.error(error);
+                showMessage('Failed to mark as purchased', 'error');
+            }
+        }
+
+        async function removeItem(itemId) {
+            try {
+                const response = await fetch(`${API_URL}/lists/${currentListId}/items/${itemId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to remove item');
+                const data = await response.json();
+                renderList(data.list);
+                showMessage('Item removed', 'success');
+            } catch (error) {
+                console.error(error);
+                showMessage('Failed to remove item', 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+
+        // Load list on page load
+        loadList();
+    </script>
+</body>
+</html>
